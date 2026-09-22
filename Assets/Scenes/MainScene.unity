@@ -3216,6 +3216,7 @@ GameObject:
   - component: {fileID: 2085133272}
   - component: {fileID: 2085133271}
   - component: {fileID: 2085133273}
+  - component: {fileID: 2085133274}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -3263,6 +3264,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1fbcd588b3368b4bba7832fd71f0aae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BelajarDeligate
+--- !u!114 &2085133274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085133270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88179a2ea4dcc3c4caa1023e53f63b27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PemancarEvent
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
