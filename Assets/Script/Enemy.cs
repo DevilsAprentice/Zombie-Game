@@ -139,24 +139,24 @@ public class Enemy : MonoBehaviour, IDamageable
 
     void PerilakuIdle()
     {
-        Debug.Log(name + ": IDLE");
+        // Debug.Log(name + ": IDLE");
     }
 
     void PerilakuPatrol()
     {
-        Debug.Log(name + ": PATROL");
+        // Debug.Log(name + ": PATROL");
         // Tambahkan logika patrol di sini
     }
 
     void PerilakuChase()
     {
-        Debug.Log(name + ": CHASE");
+        // Debug.Log(name + ": CHASE");
         Kejar();
     }
 
     void PerilakuAttack()
     {
-        Debug.Log(name + ": ATTACK");
+        // Debug.Log(name + ": ATTACK");
 
         if (Time.time >= waktuSerangTerakhir + jedaSerang)
         {
