@@ -10,6 +10,7 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
     public int itemQuantity;
     public Sprite itemIcon;
     public bool isFull;
+    public ItemDetails itemDetails;
 
     // Item Slot
     [SerializeField] private TMP_Text quantityText;
@@ -27,9 +28,16 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
     {
         inventoryManager = FindAnyObjectByType<InventoryManager>();
 
-        // Hide everything until needed
-        itemImage.enabled = false;
-        quantityText.enabled = false;
+        // Pastikan slot selalu berawal kosong
+        itemName = "";
+        itemQuantity = 0;
+        itemIcon = null;
+        itemDetails = null;
+        isFull = false;
+
+        // Hide item icon and count until an item is added
+        if (itemImage != null) itemImage.enabled = false;
+        if (quantityText != null) quantityText.enabled = false;
         if (selectedPanel != null) selectedPanel.SetActive(false);
     }
 
@@ -40,6 +48,7 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
 
     public int AddItem(ItemDetails item, int amount)
     {
+        itemDetails = item;
         itemName = item.ItemName;
         itemIcon = item.ItemIcon;
         return AddQuantity(amount);
@@ -53,10 +62,17 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
         itemQuantity += toAdd;
         isFull = itemQuantity >= maxStackSize;
 
-        quantityText.text = itemQuantity.ToString();
-        quantityText.enabled = true;
-        itemImage.sprite = itemIcon;
-        itemImage.enabled = true;
+        if (quantityText != null)
+        {
+            quantityText.text = itemQuantity.ToString();
+            quantityText.enabled = true;
+        }
+
+        if (itemImage != null)
+        {
+            itemImage.sprite = itemIcon;
+            itemImage.enabled = true;
+        }
 
         return amount - toAdd;
     }
@@ -65,8 +81,22 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            inventoryManager.DeselectAllSlots();
-            selectedPanel.SetActive(true);
+            if (inventoryManager == null) inventoryManager = FindAnyObjectByType<InventoryManager>();
+            if (inventoryManager != null)
+            {
+                inventoryManager.DeselectAllSlots();
+
+                if (!IsEmpty && itemDetails != null)
+                {
+                    inventoryManager.TampilkanDetail(itemDetails, itemQuantity);
+                }
+                else
+                {
+                    inventoryManager.KosongkanDetail();
+                }
+            }
+
+            if (selectedPanel != null) selectedPanel.SetActive(true);
             isItemSelected = true;
         }
     }

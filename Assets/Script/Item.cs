@@ -7,7 +7,14 @@ public class Item : MonoBehaviour
     
     void Awake()
     {
-        foreach (MonoBehaviour component in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+        FindCollector();
+    }
+
+    private void FindCollector()
+    {
+        if (itemCollector != null) return;
+
+        foreach (MonoBehaviour component in FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             if (component is GrabableItem collector)
             {
@@ -15,19 +22,26 @@ public class Item : MonoBehaviour
                 break;
             }
         }
-
-        if (itemCollector == null)
-        {
-            Debug.LogError("No active component implementing GrabableItem was found in the scene.", this);
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player") && ItemDetails != null && itemCollector != null)
+        if (other.CompareTag("Player") && ItemDetails != null)
         {
-            itemCollector.AddItem(ItemDetails);
-            Destroy(gameObject);
+            if (itemCollector == null)
+            {
+                FindCollector();
+            }
+
+            if (itemCollector != null)
+            {
+                itemCollector.AddItem(ItemDetails);
+                Destroy(gameObject);
+            }
+            else
+            {
+                Debug.LogError("No active component implementing GrabableItem was found in the scene to collect item: " + ItemDetails.ItemName, this);
+            }
         }
     }
 }

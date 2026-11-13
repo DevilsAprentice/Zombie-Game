@@ -15,3 +15,4 @@ MonoBehaviour:
   ItemName: Coin
   Quantity: 1
   ItemIcon: {fileID: -2413806693520163455, guid: 7ec348df8a57853489b65028208ed9c6, type: 3}
+  ItemDescription: Koin emas berkilau. Digunakan untuk menambah skor dan membeli perlengkapan.

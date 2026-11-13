@@ -3,6 +3,7 @@ using UnityEngine;
 public class child : Enemy
 {
     public bool pedang = true;
+
     public override void Serang()
     {
         if (pedang)
@@ -13,5 +14,8 @@ public class child : Enemy
         {
             Debug.Log("Child menyerang tanpa pedang!");
         }
+
+        // Panggil perilaku serang induk (memberi damage ke player dan hancur)
+        base.Serang();
     }
 }

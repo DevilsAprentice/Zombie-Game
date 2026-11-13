@@ -7,7 +7,9 @@ public class Enemy : MonoBehaviour, IDamageable
     [SerializeField] private int maxHp = 100;
     private int currentHp;
 
+    [Header("Movement & Attack")]
     public float ms = 2f;
+    [SerializeField] private int attackDamage = 20;
 
     // Event opsional untuk update UI Health Bar (mengirim currentHp & maxHp)
     public event Action<int, int> OnHealthChanged;
@@ -15,29 +17,36 @@ public class Enemy : MonoBehaviour, IDamageable
     protected Transform player;
 
     [Header("Pengaturan State Machine")]
-    [SerializeField] private float jarakDeteksi = 6f;   // masuk CHASE
+    [SerializeField] private float jarakDeteksi = 8f;   // masuk CHASE
     [SerializeField] private float jarakSerang = 1.2f;  // masuk ATTACK
-    [SerializeField] private float jedaSerang = 1f;     // jeda antar serangan
+    [SerializeField] private float jedaSerang = 0.5f;   // jeda sebelum serang
 
     private StateZombie state = StateZombie.idle;
     private float waktuSerangTerakhir;
 
     protected virtual void Start()
     {
-        // Set HP saat game mulai
         currentHp = maxHp;
         OnHealthChanged?.Invoke(currentHp, maxHp);
 
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        FindPlayer();
+    }
 
-        if (playerObj != null)
+    private void FindPlayer()
+    {
+        if (player == null)
         {
-            player = playerObj.transform;
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+            }
         }
     }
 
     void Update()
     {
+        FindPlayer();
         PeriksaTransisi();
 
         switch (state)
@@ -60,20 +69,16 @@ public class Enemy : MonoBehaviour, IDamageable
         }
     }   
 
-    
     // HEALTH SYSTEM & DAMAGE
-  
-
     public void KenaDamage(int jumlah)
     {
-        if (currentHp <= 0) return; // Cegah damage jika sudah mati
+        if (currentHp <= 0) return;
 
         currentHp -= jumlah;
-        currentHp = Mathf.Clamp(currentHp, 0, maxHp); // Batasi HP minimal 0
+        currentHp = Mathf.Clamp(currentHp, 0, maxHp);
 
         Debug.Log($"{gameObject.name} kena damage {jumlah}, HP sisa: {currentHp}");
-
-        OnHealthChanged?.Invoke(currentHp, maxHp); // Kabari UI/Health Bar
+        OnHealthChanged?.Invoke(currentHp, maxHp);
 
         if (currentHp <= 0)
         {
@@ -83,14 +88,13 @@ public class Enemy : MonoBehaviour, IDamageable
 
     public void Heal(int jumlah)
     {
-        if (currentHp <= 0) return; // Zombie mati tidak bisa di-heal
+        if (currentHp <= 0) return;
 
         currentHp += jumlah;
-        currentHp = Mathf.Clamp(currentHp, 0, maxHp); // Batasi HP tidak melebihi maxHp
+        currentHp = Mathf.Clamp(currentHp, 0, maxHp);
 
         Debug.Log($"{gameObject.name} di-heal {jumlah}, HP sekarang: {currentHp}");
-
-        OnHealthChanged?.Invoke(currentHp, maxHp); // Kabari UI/Health Bar
+        OnHealthChanged?.Invoke(currentHp, maxHp);
     }
 
     public float GetHealthPercentage()
@@ -100,14 +104,11 @@ public class Enemy : MonoBehaviour, IDamageable
 
     protected virtual void Mati()
     {
-        Debug.Log($"{gameObject.name} mati!");
+        Debug.Log($"{gameObject.name} hancur!");
         Destroy(gameObject);
     }
 
-   
     // STATE TRANSITION
-  
-
     public float JarakKePlayer()
     {
         if (player == null)
@@ -130,34 +131,28 @@ public class Enemy : MonoBehaviour, IDamageable
         }
         else
         {
-            state = StateZombie.patrol;
+            // Jika player terlihat atau dalam arena, musuh tetap mengejar player
+            state = StateZombie.chase;
         }
     }
 
-    // STATE BEHAVIOUR
-
-
     void PerilakuIdle()
     {
-        // Debug.Log(name + ": IDLE");
+        Kejar();
     }
 
     void PerilakuPatrol()
     {
-        // Debug.Log(name + ": PATROL");
-        // Tambahkan logika patrol di sini
+        Kejar();
     }
 
     void PerilakuChase()
     {
-        // Debug.Log(name + ": CHASE");
         Kejar();
     }
 
     void PerilakuAttack()
     {
-        // Debug.Log(name + ": ATTACK");
-
         if (Time.time >= waktuSerangTerakhir + jedaSerang)
         {
             Serang();
@@ -165,10 +160,7 @@ public class Enemy : MonoBehaviour, IDamageable
         }
     }
 
-
     // MOVEMENT & ATTACK
-
-
     public void Kejar()
     {
         if (player == null)
@@ -183,6 +175,33 @@ public class Enemy : MonoBehaviour, IDamageable
 
     public virtual void Serang()
     {
-        Debug.Log("Enemy menyerang!");
+        if (player != null)
+        {
+            IDamageable damageable = player.GetComponent<IDamageable>();
+            if (damageable != null)
+            {
+                damageable.KenaDamage(attackDamage);
+                Debug.Log($"{gameObject.name} menyerang Player dan memberikan damage {attackDamage}!");
+            }
+        }
+
+        // Ketentuan: Ketika sudah menyerang, musuh akan hancur
+        Mati();
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Serang();
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Serang();
+        }
     }
 }
